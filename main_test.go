@@ -22,10 +22,7 @@ func TestHandler(t *testing.T) {
 		{"/INVALID", "404"}, // http.ServeMux has 404 a handler that prints the status code to the body
 	}
 	for _, test := range handlerTests {
-		h, err := newHandler()
-		if err != nil {
-			t.Fatalf("unwanted error creating handler: %v", err)
-		}
+		h := newHandler()
 		r := httptest.NewRequest("GET", test.url, nil)
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)

@@ -17,32 +17,18 @@ var htmlFS embed.FS
 var readme []byte // can also be embedded as a string
 
 func main() {
-	h, err := newHandler()
-	if err != nil {
-		log.Fatalf("creating handler: %v", err)
-	}
-	svr := http.Server{
-		Addr:    ":8000",
-		Handler: h,
-	}
-	log.Println("starting server at http://localhost" + svr.Addr)
-	svr.ListenAndServe()
+	port := "8000"
+	log.Println("starting server at http://localhost:" + port)
+	http.ListenAndServe(":"+port, newHandler())
 }
 
-func newHandler() (http.Handler, error) {
-	helloFile, err := htmlFS.ReadFile("html/hello.html")
-	if err != nil {
-		return nil, err
-	}
-	t, err := template.New("").Parse(string(helloFile))
-	if err != nil {
-		return nil, err
-	}
+func newHandler() http.Handler {
+	helloT := template.Must(template.New("hello.html").ParseFS(htmlFS, "html/hello.html"))
 	mux := http.NewServeMux()
-	mux.Handle("/hello", helloTemplateHandler(t))
+	mux.Handle("/hello", helloTemplateHandler(helloT))
 	mux.Handle("/about", aboutHandler())
 	mux.Handle("/", http.FileServer(http.FS(htmlFS)))
-	return mux, nil
+	return mux
 }
 
 func helloTemplateHandler(t *template.Template) http.HandlerFunc {
